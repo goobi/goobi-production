@@ -9,7 +9,7 @@
  * GPL3-License.txt file that was distributed with this source code.
  */
 
-package org.kitodo.production.version;
+package org.kitodo.production;
 
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -17,30 +17,21 @@ import java.util.jar.Manifest;
 public class KitodoVersion {
 
     private static String version = "N/A";
-    private static String buildVersion = "N/A";
     private static String buildDate = "N/A";
-
-    /**
-     * Private constructor to hide the implicit public one.
-     */
-    private KitodoVersion() {
-
-    }
 
     /**
      * Setup KitodoVersion form manifest.
      *
      * @param manifest as Manifest
      */
-    public static void setupFromManifest(Manifest manifest) {
+    void setupFromManifest(Manifest manifest) {
         Attributes mainAttributes = manifest.getMainAttributes();
 
         version = getValueOrThrowException(mainAttributes, "Implementation-Version");
-        buildVersion = version;
         buildDate = getValueOrThrowException(mainAttributes, "Implementation-Build-Date");
     }
 
-    private static String getValueOrThrowException(Attributes attributes, String attributeName) {
+    private String getValueOrThrowException(Attributes attributes, String attributeName) {
         String value = attributes.getValue(attributeName);
         if (null == value) {
             throw new IllegalArgumentException(
@@ -49,15 +40,11 @@ public class KitodoVersion {
         return value;
     }
 
-    public static String getVersion() {
+    public String getVersion() {
         return version;
     }
 
-    public static String getBuildVersion() {
-        return buildVersion;
-    }
-
-    public static String getBuildDate() {
+    public String getBuildDate() {
         return buildDate;
     }
 }

@@ -41,8 +41,7 @@ import org.kitodo.production.helper.tasks.EmptyTask.Behaviour;
  * constructor is private) a caring class is needed which will be available for
  * instantiation to the servlet container.
  */
-@WebListener
-public class TaskSitter implements Runnable, ServletContextListener {
+public class TaskSitter implements Runnable {
     /**
      * The field autoRunLimit holds the number of threads which at most are
      * allowed to be started automatically. It is by default initialised by the
@@ -53,27 +52,6 @@ public class TaskSitter implements Runnable, ServletContextListener {
 
     static {
         setAutoRunningThreads(true);
-    }
-
-    /**
-     * When the servlet is unloaded, i.e. on container shutdown, the TaskManager
-     * shall be shut down gracefully.
-     *
-     * @see javax.servlet.ServletContextListener#contextDestroyed(javax.servlet.ServletContextEvent)
-     */
-    @Override
-    public void contextDestroyed(ServletContextEvent arg) {
-        TaskManager.shutdownNow();
-    }
-
-    /**
-     * Currently, there is nothing to do when the servlet is loading.
-     *
-     * @see javax.servlet.ServletContextListener#contextInitialized(javax.servlet.ServletContextEvent)
-     */
-    @Override
-    public void contextInitialized(ServletContextEvent argument) {
-        // nothing is done here
     }
 
     /**

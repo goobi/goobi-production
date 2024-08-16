@@ -49,8 +49,7 @@ import org.kitodo.config.enums.ParameterCore;
  * The class ActiveMQDirector also provides a basic ExceptionListener
  * implementation as required for the connection.
  */
-@WebListener
-public class ActiveMQDirector implements Runnable, ServletContextListener {
+public class ActiveMQDirector implements Runnable {
     private static final Logger logger = LogManager.getLogger(ActiveMQDirector.class);
 
     // When implementing new services, add them to this list
@@ -63,21 +62,6 @@ public class ActiveMQDirector implements Runnable, ServletContextListener {
     private static Connection connection = null;
     private static Session session = null;
     private static MessageProducer resultsTopic;
-
-    /**
-     * The method is called by the web container on startup
-     * and is used to start up the active MQ connection. All processors from
-     * {@link #services} are registered.
-     */
-    @Override
-    public void contextInitialized(ServletContextEvent initialisation) {
-        if (ConfigCore.getOptionalString(ParameterCore.ACTIVE_MQ_HOST_URL).isPresent()) {
-            Thread connectAsynchronously = new Thread(new ActiveMQDirector());
-            connectAsynchronously.setName(ActiveMQDirector.class.getSimpleName());
-            connectAsynchronously.setDaemon(true);
-            connectAsynchronously.start();
-        }
-    }
 
     @Override
     public void run() {
@@ -226,8 +210,7 @@ public class ActiveMQDirector implements Runnable, ServletContextListener {
      * The method contextDestroyed is called by the web container on shutdown.
      * It shuts down all listeners, the session and last, the connection.
      */
-    @Override
-    public void contextDestroyed(ServletContextEvent destruction) {
+    public void shutDown() {
         // Shut down all message consumers on any queues
         for (ActiveMQProcessor service : services) {
             MessageConsumer messageConsumer = service.getMessageConsumer();

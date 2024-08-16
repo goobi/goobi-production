@@ -223,7 +223,7 @@ public class TaskManager {
      * exit the task manager as well as its managed threads during container
      * shutdown.
      */
-    static void shutdownNow() {
+    public static void shutdownNow() {
         stopAndDeleteAllTasks();
         singleton().taskSitter.shutdownNow();
     }
