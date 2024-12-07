@@ -29,9 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
+import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 
 import org.apache.commons.io.IOUtils;
@@ -59,7 +59,7 @@ import org.kitodo.production.workflow.model.Converter;
 import org.kitodo.production.workflow.model.Reader;
 
 @Named("WorkflowForm")
-@SessionScoped
+@ViewScoped
 public class WorkflowForm extends BaseForm {
 
     private static final Logger logger = LogManager.getLogger(WorkflowForm.class);
@@ -270,8 +270,10 @@ public class WorkflowForm extends BaseForm {
 
         xmlDiagram = requestParameterMap.get("editForm:workflowTabView:xmlDiagram");
         if (Objects.nonNull(xmlDiagram)) {
-            svgDiagram = StringUtils.substringAfter(xmlDiagram, "kitodo-diagram-separator");
-            xmlDiagram = StringUtils.substringBefore(xmlDiagram, "kitodo-diagram-separator");
+            if (xmlDiagram.contains("kitodo-diagram-separator")) {
+                svgDiagram = StringUtils.substringAfter(xmlDiagram, "kitodo-diagram-separator");
+                xmlDiagram = StringUtils.substringBefore(xmlDiagram, "kitodo-diagram-separator");
+            }
 
             Reader reader = new Reader(new ByteArrayInputStream(xmlDiagram.getBytes(StandardCharsets.UTF_8)));
             reader.validateWorkflowTasks();
@@ -279,7 +281,9 @@ public class WorkflowForm extends BaseForm {
             Converter converter = new Converter(new ByteArrayInputStream(xmlDiagram.getBytes(StandardCharsets.UTF_8)));
             converter.validateWorkflowTaskList();
 
-            saveFile(svgDiagramURI, svgDiagram);
+            if (Objects.nonNull(svgDiagram)) {
+                saveFile(svgDiagramURI, svgDiagram);
+            }
             saveFile(xmlDiagramURI, xmlDiagram);
         }
 
@@ -328,6 +332,7 @@ public class WorkflowForm extends BaseForm {
 
     private void saveWorkflow() {
         try {
+            this.workflow.setClient(ServiceManager.getUserService().getSessionClientOfAuthenticatedUser());
             ServiceManager.getWorkflowService().save(this.workflow, true);
         } catch (DataException e) {
             Helper.setErrorMessage(e.getLocalizedMessage(), logger, e);
@@ -340,9 +345,7 @@ public class WorkflowForm extends BaseForm {
      * @return page
      */
     public String newWorkflow() {
-        this.workflow = new Workflow();
-        this.workflow.setClient(ServiceManager.getUserService().getSessionClientOfAuthenticatedUser());
-        return workflowEditPath + "&id=" + (Objects.isNull(this.workflow.getId()) ? 0 : this.workflow.getId());
+        return workflowEditPath + "&id=0";
     }
 
     /**
