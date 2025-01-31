@@ -31,7 +31,7 @@ public class CourseTest {
     public void testCloneMethod() throws IOException, ParserConfigurationException, SAXException {
         String xmlString = new String(Files.readAllBytes(new File("src/test/resources/newspaper-course.xml").toPath()));
         Document xmlDocument = XMLUtils.parseXMLString(xmlString);
-        Course course = new Course(xmlDocument);
+        Course course = new Course(xmlDocument, null);
 
         // assert / check some data from the xml file
         assertEquals(23L, course.getIndividualIssues().size());
