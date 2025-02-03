@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -101,5 +102,18 @@ public class TemplateServiceIT {
         templateDTO = templateService.findById(3);
         condition = templateService.hasCompleteTasks(templateDTO.getTasks());
         assertFalse(condition, "Process DTO has complete tasks!");
+    }
+
+    @Test
+    public void shouldCorrectlyDetermineTemplateUsage() throws Exception {
+        Map<Integer, Boolean> templateUsageMap = templateService.getTemplateUsageMap();
+        Map<Integer, Boolean> expectedMap = Map.of(
+                1, true,
+                2, false,
+                3, false,
+                4, false
+        );
+        // Assert that the generated map matches the expected map
+        assertEquals(expectedMap, templateUsageMap, "The template usage map does not match expected results.");
     }
 }

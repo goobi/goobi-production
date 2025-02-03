@@ -260,6 +260,22 @@ public abstract class BaseDAO<T extends BaseBean> implements Serializable {
     }
 
     /**
+     * Executes an HQL query that returns scalar projections (e.g., specific fields or aggregate results)
+     * instead of full entity objects.
+     *
+     * @param hql the HQL query string
+     * @param parameters query parameters
+     * @return list of scalar projection results
+     */
+    public List<Object[]> getProjectionByQuery(String hql, Map<String, Object> parameters) {
+        try (Session session = HibernateUtil.getSession()) {
+            Query<Object[]> query = session.createQuery(hql, Object[].class);
+            addParameters(query, parameters);
+            return query.getResultList();
+        }
+    }
+
+    /**
      * Removes the object from the database with with specified class type and
      * {@code id}.
      *

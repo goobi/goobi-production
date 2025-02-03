@@ -86,6 +86,27 @@ public class TemplateService extends ClientSearchService<Template, TemplateDTO, 
         return localReference;
     }
 
+    /**
+     * Retrieves a map indicating the usage status of templates.
+     * The method executes an HQL query to determine whether each template is used
+     * (i.e., has associated processes).
+     *
+     * @return a map where the key is the template ID and the value is a boolean
+     *         indicating whether the template is used
+     */
+    public Map<Integer, Boolean> getTemplateUsageMap() {
+        String hql = "SELECT t.id AS templateId, "
+                + " CASE WHEN EXISTS (SELECT 1 FROM Process p WHERE p.template.id = t.id) "
+                + " THEN true ELSE false END AS isUsed "
+                + " FROM Template t";
+        List<Object[]> results = getProjectionByQuery(hql);
+        return results.stream()
+                .collect(Collectors.toMap(
+                        row -> (Integer) row[0], // templateId
+                        row -> (Boolean) row[1]  // isUsed
+                ));
+    }
+
     @Override
     public Long countDatabaseRows() throws DAOException {
         return countDatabaseRows("SELECT COUNT(*) FROM Template");

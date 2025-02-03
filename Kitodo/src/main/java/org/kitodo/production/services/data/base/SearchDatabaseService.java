@@ -198,6 +198,17 @@ public abstract class SearchDatabaseService<T extends BaseBean, S extends BaseDA
     }
 
     /**
+     * Executes an HQL query that returns scalar projections (e.g., specific fields or aggregate results)
+     * instead of full entity objects.
+     *
+     * @param hql the HQL query string
+     * @return list of scalar projection results
+     */
+    protected List<Object[]> getProjectionByQuery(String hql) {
+        return dao.getProjectionByQuery(hql, null);
+    }
+
+    /**
      * Evict given bean object.
      *
      * @param baseBean
