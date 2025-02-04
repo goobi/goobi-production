@@ -12,6 +12,7 @@
 package org.kitodo.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.kitodo.constants.StringConstants.KITODO;
 
 import java.io.IOException;
 import java.util.List;
@@ -62,7 +63,7 @@ public class ConfigProjectTest {
 
     @Test
     public void shouldGetTifDefinition() throws DoctypeMissingException {
-        assertEquals("kitodo", configProject.getTifDefinition(), "Tif definition is incorrect!");
+        assertEquals(KITODO, configProject.getTifDefinition(), "Tif definition is incorrect!");
     }
 
     @Test

@@ -12,6 +12,7 @@
 package org.kitodo.production.services.index;
 
 import static java.lang.Math.toIntExact;
+import static org.kitodo.constants.StringConstants.KITODO;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -113,7 +114,7 @@ public class IndexingService {
             searchServices.put(objectType, getService(objectType));
             objectIndexingStates.put(objectType, IndexStates.NO_STATE);
         }
-        indexRestClient.setIndexBase(ConfigMain.getParameter("elasticsearch.index", "kitodo"));
+        indexRestClient.setIndexBase(ConfigMain.getParameter("elasticsearch.index", KITODO));
         try {
             countDatabaseObjects();
         } catch (DAOException e) {

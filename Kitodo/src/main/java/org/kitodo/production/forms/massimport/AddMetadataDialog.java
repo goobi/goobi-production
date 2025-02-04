@@ -11,6 +11,8 @@
 
 package org.kitodo.production.forms.massimport;
 
+import static org.kitodo.constants.StringConstants.CREATE;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +36,6 @@ public class AddMetadataDialog {
     private RulesetManagementInterface rulesetManagement;
     private final List<Locale.LanguageRange> priorityList = ServiceManager.getUserService()
             .getCurrentMetadataLanguage();
-    private final String acquisitionStage = "create";
     private List<StructuralElementViewInterface> allRulesetDivisions = new ArrayList<>();
 
     AddMetadataDialog(MassImportForm massImportForm) {
@@ -71,7 +72,7 @@ public class AddMetadataDialog {
     /**
      * Returns the list of selectable metadata types.
      *
-     * @return the map of metadata types
+     * @return the list of metadata types
      */
     public List<ProcessDetail> getAllMetadataTypes() {
         if (Objects.isNull(metadataTypes)) {
@@ -96,7 +97,7 @@ public class AddMetadataDialog {
 
     private List<StructuralElementViewInterface> getDivisions() {
         return rulesetManagement.getStructuralElements(priorityList).keySet().stream()
-                .map(key -> rulesetManagement.getStructuralElementView(key, acquisitionStage, priorityList))
+                .map(key -> rulesetManagement.getStructuralElementView(key, CREATE, priorityList))
                 .collect(Collectors.toList());
     }
 

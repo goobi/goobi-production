@@ -13,6 +13,7 @@ package org.kitodo.production.services.data;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.kitodo.constants.StringConstants.CREATE;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -79,7 +80,7 @@ public class MassImportServiceIT {
         RulesetManagementInterface rulesetInterface = ServiceManager.getRulesetService().openRuleset(ruleset);
         List<Locale.LanguageRange> priorityList = Locale.LanguageRange.parse("en");
         return rulesetInterface.getStructuralElements(priorityList).keySet().stream()
-                .map(key -> rulesetInterface.getStructuralElementView(key, "create", priorityList))
+                .map(key -> rulesetInterface.getStructuralElementView(key, CREATE, priorityList))
                 .collect(Collectors.toList());
     }
 

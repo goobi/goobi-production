@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.kitodo.constants.StringConstants.EDIT;
 import static org.kitodo.test.utils.TestConstants.TITLE_DOC_MAIN;
 
 import java.io.File;
@@ -58,7 +59,6 @@ public class DataEditorServiceIT {
     private static final String TEST_METADATA_FILE = "testmeta.xml";
     private static final String TEST_RULESET = "src/test/resources/rulesets/ruleset_test.xml";
     private static final String ENGLISH = "en";
-    private static final String EDIT = "edit";
     private static final String CONTRIBUTOR_PERSON = "ContributorPerson";
     private static final String EXPECTED_EXCEPTION_MESSAGE = "Unable to update metadata of process %d; " +
             "(either import configuration or record identifier are missing)";

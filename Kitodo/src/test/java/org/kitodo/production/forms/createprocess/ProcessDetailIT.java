@@ -12,6 +12,7 @@
 package org.kitodo.production.forms.createprocess;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.kitodo.constants.StringConstants.EDIT;
 
 import java.io.File;
 import java.util.Locale;
@@ -32,7 +33,7 @@ public class ProcessDetailIT {
     public void shouldCopyProcessDetail() throws Exception {
         RulesetManagementInterface ruleset = ServiceManager.getRulesetManagementService().getRulesetManagement();
         ruleset.load(new File(TestConstants.TEST_RULESET));
-        StructuralElementViewInterface divisionView = ruleset.getStructuralElementView("Monograph", "edit",
+        StructuralElementViewInterface divisionView = ruleset.getStructuralElementView("Monograph", EDIT,
             Locale.LanguageRange.parse("en"));
         LogicalDivision division = new LogicalDivision();
         division.setType("Monograph");

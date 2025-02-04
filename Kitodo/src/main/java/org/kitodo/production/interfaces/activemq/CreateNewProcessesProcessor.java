@@ -11,6 +11,8 @@
 
 package org.kitodo.production.interfaces.activemq;
 
+import static org.kitodo.constants.StringConstants.CREATE;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -67,7 +69,6 @@ import org.xml.sax.SAXException;
 public class CreateNewProcessesProcessor extends ActiveMQProcessor {
     private static final Logger logger = LogManager.getLogger(CreateNewProcessesProcessor.class);
 
-    private static final String ACQUISITION_STAGE_PROCESS_CREATION = "create";
     private static final int IMPORT_WITHOUT_ANY_HIERARCHY = 1;
     private static final String LAST_CHILD = Integer.toString(-1);
     private static final List<LanguageRange> METADATA_LANGUAGE = Locale.LanguageRange.parse("en");
@@ -135,8 +136,7 @@ public class CreateNewProcessesProcessor extends ActiveMQProcessor {
                 TempProcess repeatedImport = importProcess(order, which);
                 Set<Metadata> metadata = repeatedImport.getWorkpiece().getLogicalStructure().getMetadata();
                 rulesetManagement.updateMetadata(tempProcess.getWorkpiece().getLogicalStructure().getType(),
-                    tempProcess.getWorkpiece().getLogicalStructure().getMetadata(),
-                    ACQUISITION_STAGE_PROCESS_CREATION, metadata);
+                    tempProcess.getWorkpiece().getLogicalStructure().getMetadata(), CREATE, metadata);
             }
             return tempProcess;
         }
@@ -174,11 +174,11 @@ public class CreateNewProcessesProcessor extends ActiveMQProcessor {
             throws DAOException, ProcessGenerationException, ProcessorException {
 
         ProcessFieldedMetadata processDetails = ProcessHelper.initializeProcessDetails(tempProcess.getWorkpiece()
-                .getLogicalStructure(), rulesetManagement, ACQUISITION_STAGE_PROCESS_CREATION, METADATA_LANGUAGE);
+                .getLogicalStructure(), rulesetManagement, CREATE, METADATA_LANGUAGE);
         Process parentProcess = order.getParent();
         ProcessHelper.generateAtstslFields(tempProcess, processDetails.getRows(), Collections.emptyList(), tempProcess
-                .getWorkpiece().getLogicalStructure().getType(), rulesetManagement, ACQUISITION_STAGE_PROCESS_CREATION,
-            METADATA_LANGUAGE, parentProcess, true);
+                .getWorkpiece().getLogicalStructure().getType(), rulesetManagement, CREATE, METADATA_LANGUAGE,
+                parentProcess, true);
         if (order.getTitle().isPresent()) {
             process.setTitle(order.getTitle().get());
         }

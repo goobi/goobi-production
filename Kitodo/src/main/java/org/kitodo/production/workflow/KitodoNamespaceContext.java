@@ -11,6 +11,8 @@
 
 package org.kitodo.production.workflow;
 
+import static org.kitodo.constants.StringConstants.KITODO;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -26,7 +28,7 @@ public class KitodoNamespaceContext implements NamespaceContext {
      */
     public KitodoNamespaceContext() {
         namespaces = new HashMap<>();
-        namespaces.put("kitodo", "http://meta.kitodo.org/v1/");
+        namespaces.put(KITODO, "http://meta.kitodo.org/v1/");
         namespaces.put("mets", "http://www.loc.gov/METS/");
         namespaces.put("mods", "http://www.loc.gov/mods/v3");
         namespaces.put("marc", "http://www.loc.gov/MARC21/slim");

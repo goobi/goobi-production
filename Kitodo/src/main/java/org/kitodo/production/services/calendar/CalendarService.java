@@ -11,6 +11,8 @@
 
 package org.kitodo.production.services.calendar;
 
+import static org.kitodo.constants.StringConstants.CREATE;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -76,7 +78,6 @@ public class CalendarService {
      * @throws IOException when ruleset file could not be read
      */
     public static List<MetadataViewInterface> getAddableMetadata(Process completeEdition) throws IOException, DataException {
-        final String acquisitionStage = "create";
 
         // get an instance of the ruleset module
         RulesetManagementInterface ruleset = ServiceManager.getRulesetManagementService().getRulesetManagement();
@@ -94,19 +95,19 @@ public class CalendarService {
         String newspaperType = ServiceManager.getProcessService().getBaseType(completeEdition.getId());
 
         // descend to the issue
-        StructuralElementViewInterface newspaperView = ruleset.getStructuralElementView(newspaperType, acquisitionStage, priorityList);
+        StructuralElementViewInterface newspaperView = ruleset.getStructuralElementView(newspaperType, CREATE, priorityList);
         String yearType = newspaperView.getAllowedSubstructuralElements().entrySet().iterator().next().getKey();
 
-        StructuralElementViewInterface yearView = ruleset.getStructuralElementView(yearType, acquisitionStage, priorityList);
+        StructuralElementViewInterface yearView = ruleset.getStructuralElementView(yearType, CREATE, priorityList);
         String monthType = yearView.getAllowedSubstructuralElements().entrySet().iterator().next().getKey();
 
-        StructuralElementViewInterface monthView = ruleset.getStructuralElementView(monthType, acquisitionStage, priorityList);
+        StructuralElementViewInterface monthView = ruleset.getStructuralElementView(monthType, CREATE, priorityList);
         String dayType = monthView.getAllowedSubstructuralElements().entrySet().iterator().next().getKey();
 
-        StructuralElementViewInterface dayView = ruleset.getStructuralElementView(dayType, acquisitionStage, priorityList);
+        StructuralElementViewInterface dayView = ruleset.getStructuralElementView(dayType, CREATE, priorityList);
         String issueType = dayView.getAllowedSubstructuralElements().entrySet().iterator().next().getKey();
 
-        StructuralElementViewInterface issueView = ruleset.getStructuralElementView(issueType, acquisitionStage, priorityList);
+        StructuralElementViewInterface issueView = ruleset.getStructuralElementView(issueType, CREATE, priorityList);
 
         // From view to output, get all addable metadata
         return new ArrayList<>(issueView.getAllowedMetadata())

@@ -11,6 +11,8 @@
 
 package org.kitodo.config;
 
+import static org.kitodo.constants.StringConstants.KITODO;
+
 import de.unigoettingen.sub.search.opac.ConfigOpac;
 
 import java.io.IOException;
@@ -141,7 +143,7 @@ public class ConfigProject {
      * @return tif definition as String
      */
     public String getTifDefinition() throws DoctypeMissingException {
-        return getParamString("tifheader." + getDocType(), "kitodo");
+        return getParamString("tifheader." + getDocType(), KITODO);
     }
 
     /**

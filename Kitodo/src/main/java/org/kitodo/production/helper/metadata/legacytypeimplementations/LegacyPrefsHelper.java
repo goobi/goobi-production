@@ -11,6 +11,8 @@
 
 package org.kitodo.production.helper.metadata.legacytypeimplementations;
 
+import static org.kitodo.constants.StringConstants.EDIT;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -95,7 +97,7 @@ public class LegacyPrefsHelper {
                     logger.catching(Level.TRACE, e);
                     priorityList = LanguageRange.parse("en");
                 }
-                StructuralElementViewInterface divisionView = ruleset.getStructuralElementView("", "edit",
+                StructuralElementViewInterface divisionView = ruleset.getStructuralElementView("", EDIT,
                     priorityList);
                 List<MetadataViewWithValuesInterface> entryViews = divisionView
                         .getSortedVisibleMetadata(Collections.emptyList(), Arrays.asList(identifier));

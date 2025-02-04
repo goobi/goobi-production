@@ -11,6 +11,9 @@
 
 package org.kitodo.production.services.data;
 
+import static org.kitodo.constants.StringConstants.CREATE;
+import static org.kitodo.constants.StringConstants.KITODO;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -120,12 +123,10 @@ import org.xml.sax.SAXParseException;
 public class ImportService {
 
     private static final Logger logger = LogManager.getLogger(ImportService.class);
-    public static final String ACQUISITION_STAGE_CREATE = "create";
 
     private static volatile ImportService instance = null;
     private static ExternalDataImportInterface importModule;
     private static final String KITODO_NAMESPACE = "http://meta.kitodo.org/v1/";
-    private static final String KITODO_STRING = "kitodo";
 
     private ProcessGenerator processGenerator;
     private static final String REPLACE_ME = "REPLACE_ME";
@@ -363,7 +364,7 @@ public class ImportService {
     private String getRecordDocType(Document record, Ruleset ruleset) throws IOException {
         Collection<String> doctypes = getDocTypeMetadata(ruleset);
         Element root = record.getDocumentElement();
-        NodeList kitodoNodes = root.getElementsByTagNameNS(KITODO_NAMESPACE, KITODO_STRING);
+        NodeList kitodoNodes = root.getElementsByTagNameNS(KITODO_NAMESPACE, KITODO);
         if (kitodoNodes.getLength() > 0 && !doctypes.isEmpty() && kitodoNodes.item(0) instanceof Element) {
             Element kitodoElement = (Element) kitodoNodes.item(0);
             NodeList importedMetadata = kitodoElement.getElementsByTagNameNS(KITODO_NAMESPACE, "metadata");
@@ -566,7 +567,7 @@ public class ImportService {
             if (fromIndex < processes.size()) {
                 parents = processes.subList(fromIndex, processes.size());
             }
-            ProcessHelper.generateAtstslFields(processesIterator.next(), parents, ACQUISITION_STAGE_CREATE, false);
+            ProcessHelper.generateAtstslFields(processesIterator.next(), parents, CREATE, false);
         }
 
         return processes;
@@ -724,7 +725,7 @@ public class ImportService {
                 TempProcess tempProcess = createTempProcessFromDocument(importConfiguration, childDocument,
                         templateId, projectId);
                 tempProcess.getProcess().setImportConfiguration(importConfiguration);
-                ProcessHelper.generateAtstslFields(tempProcess, parentProcesses, ACQUISITION_STAGE_CREATE, false);
+                ProcessHelper.generateAtstslFields(tempProcess, parentProcesses, CREATE, false);
                 childProcesses.add(tempProcess);
             }
 
@@ -799,7 +800,7 @@ public class ImportService {
         for (Element fileElement : childElements) {
             TempProcess currentFileProcess = createTempProcessFromElement(fileElement, importConfiguration,
                     projectId, templateId, false);
-            ProcessHelper.generateAtstslFields(currentFileProcess, parentProcesses, ACQUISITION_STAGE_CREATE, false);
+            ProcessHelper.generateAtstslFields(currentFileProcess, parentProcesses, CREATE, false);
             eadCollectionProcesses.add(currentFileProcess);
         }
 
@@ -915,7 +916,7 @@ public class ImportService {
     }
 
     private NodeList extractMetadataNodeList(Document document) throws ProcessGenerationException {
-        NodeList kitodoNodes = document.getElementsByTagNameNS(KITODO_NAMESPACE, KITODO_STRING);
+        NodeList kitodoNodes = document.getElementsByTagNameNS(KITODO_NAMESPACE, KITODO);
         if (kitodoNodes.getLength() != 1) {
             throw new ProcessGenerationException("Number of 'kitodo' nodes unequal to '1' => unable to generate process!");
         }
@@ -1380,7 +1381,7 @@ public class ImportService {
             String metadataLanguage = ServiceManager.getUserService().getCurrentUser().getMetadataLanguage();
             tempProcess.getWorkpiece().getLogicalStructure().getMetadata().addAll(createMetadata(presetMetadata));
             processTempProcess(tempProcess, ServiceManager.getRulesetService().openRuleset(template.getRuleset()),
-                    "create", Locale.LanguageRange.parse(metadataLanguage.isEmpty() ? "en" : metadataLanguage),
+                    CREATE, Locale.LanguageRange.parse(metadataLanguage.isEmpty() ? "en" : metadataLanguage),
                     parentTempProcess);
             setLabelAndOrderLabelOfImportedProcess(tempProcess, presetMetadata);
             String title = tempProcess.getProcess().getTitle();
@@ -1585,7 +1586,7 @@ public class ImportService {
         boolean isConfigured = true;
         for (Map.Entry<String, String> division : structuralElements.entrySet()) {
             StructuralElementViewInterface divisionView = rulesetManagement
-                    .getStructuralElementView(division.getKey(), ACQUISITION_STAGE_CREATE, languages);
+                    .getStructuralElementView(division.getKey(), CREATE, languages);
             List<String> allowedMetadataKeys = divisionView.getAllowedMetadata().stream()
                     .map(MetadataViewInterface::getId).collect(Collectors.toList());
             allowedMetadataKeys.retainAll(recordIdentifierMetadata);

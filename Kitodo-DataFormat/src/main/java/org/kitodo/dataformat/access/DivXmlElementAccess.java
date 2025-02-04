@@ -11,6 +11,8 @@
 
 package org.kitodo.dataformat.access;
 
+import static org.kitodo.constants.StringConstants.KITODO;
+
 import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -58,7 +60,7 @@ public class DivXmlElementAccess extends LogicalDivision {
      * The qualified name of the Kitodo metadata format, needed to assemble the
      * metadata entries in METS using JAXB.
      */
-    private static final QName KITODO_QNAME = new QName("http://meta.kitodo.org/v1/", "kitodo");
+    private static final QName KITODO_QNAME = new QName("http://meta.kitodo.org/v1/", KITODO);
 
     /**
      * Some magic numbers that are used in the METS XML file representation of

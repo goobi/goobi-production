@@ -14,6 +14,7 @@ package org.kitodo.production.metadata;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.kitodo.constants.StringConstants.EDIT;
 import static org.kitodo.test.utils.ProcessTestUtils.METADATA_BASE_DIR;
 import static org.kitodo.test.utils.ProcessTestUtils.META_XML;
 
@@ -122,7 +123,7 @@ public class MetadataEditorIT {
 
         RulesetManagementInterface ruleset = ServiceManager.getRulesetManagementService().getRulesetManagement();
         ruleset.load(new File(TestConstants.TEST_RULESET));
-        StructuralElementViewInterface divisionView = ruleset.getStructuralElementView("Monograph", "edit",
+        StructuralElementViewInterface divisionView = ruleset.getStructuralElementView("Monograph", EDIT,
             Locale.LanguageRange.parse("en"));
         String metadataKey = "TitleDocMain";
 
@@ -157,7 +158,7 @@ public class MetadataEditorIT {
     public void shouldAddMultipleStructuresWithMetadataEntry() throws Exception {
         RulesetManagementInterface ruleset = ServiceManager.getRulesetManagementService().getRulesetManagement();
         ruleset.load(new File(TestConstants.TEST_RULESET));
-        StructuralElementViewInterface divisionView = ruleset.getStructuralElementView("Monograph", "edit",
+        StructuralElementViewInterface divisionView = ruleset.getStructuralElementView("Monograph", EDIT,
             Locale.LanguageRange.parse("en"));
         String metadataKey = "Person";
 

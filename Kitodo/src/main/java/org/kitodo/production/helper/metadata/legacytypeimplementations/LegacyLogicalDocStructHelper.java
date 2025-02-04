@@ -11,6 +11,8 @@
 
 package org.kitodo.production.helper.metadata.legacytypeimplementations;
 
+import static org.kitodo.constants.StringConstants.EDIT;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,7 +79,7 @@ public class LegacyLogicalDocStructHelper implements LegacyDocStructHelperInterf
         this.priorityList = priorityList;
         this.parent = parent;
         String type = logicalDivision.getType();
-        this.divisionView = ruleset.getStructuralElementView(Objects.nonNull(type) ? type : "", "edit", priorityList);
+        this.divisionView = ruleset.getStructuralElementView(Objects.nonNull(type) ? type : "", EDIT, priorityList);
     }
 
     @Override

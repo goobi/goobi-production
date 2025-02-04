@@ -11,6 +11,8 @@
 
 package org.kitodo.production.forms.createprocess;
 
+import static org.kitodo.constants.StringConstants.CREATE;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,7 +34,6 @@ import org.kitodo.production.helper.Helper;
 import org.kitodo.production.helper.ProcessHelper;
 import org.kitodo.production.helper.TempProcess;
 import org.kitodo.production.services.ServiceManager;
-import org.kitodo.production.services.data.ImportService;
 import org.omnifaces.util.Ajax;
 import org.primefaces.PrimeFaces;
 
@@ -85,11 +86,10 @@ public abstract class MetadataImportDialog {
 
         if (StringUtils.isBlank(tempProcess.getAtstsl())) {
             if (Objects.nonNull(parentTempProcess)) {
-                ProcessHelper.generateAtstslFields(tempProcess, Collections.singletonList(parentTempProcess),
-                        ImportService.ACQUISITION_STAGE_CREATE, true);
+                ProcessHelper.generateAtstslFields(tempProcess, Collections.singletonList(parentTempProcess), CREATE,
+                        true);
             } else {
-                ProcessHelper.generateAtstslFields(tempProcess, null,
-                        ImportService.ACQUISITION_STAGE_CREATE, true);
+                ProcessHelper.generateAtstslFields(tempProcess, null, CREATE, true);
             }
         }
     }

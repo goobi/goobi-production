@@ -11,6 +11,8 @@
 
 package org.kitodo.production.forms.createprocess;
 
+import static org.kitodo.constants.StringConstants.CREATE;
+
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
@@ -146,7 +148,7 @@ public class ProcessFieldedMetadata extends ProcessDetail implements Serializabl
             throws InvalidMetadataValueException, NoSuchMetadataFieldException {
 
         preserve();
-        int count = rulesetService.updateMetadata(division.getType(), metadata, "create", potentialMetadataItems);
+        int count = rulesetService.updateMetadata(division.getType(), metadata, CREATE, potentialMetadataItems);
         buildTreeNodeAndCreateMetadataTable();
         return count;
     }

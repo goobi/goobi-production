@@ -11,6 +11,8 @@
 
 package org.kitodo.production.forms.dataeditor;
 
+import static org.kitodo.constants.StringConstants.EDIT;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -83,12 +85,6 @@ import org.primefaces.model.TreeNode;
 public class DataEditorForm implements MetadataTreeTableInterface, RulesetSetupInterface, Serializable {
 
     private static final Logger logger = LogManager.getLogger(DataEditorForm.class);
-
-    /**
-     * A filter on the rule set depending on the workflow step. So far this is
-     * not configurable anywhere and is therefore on “edit”.
-     */
-    private final String acquisitionStage;
 
     /**
      * Backing bean for the add doc struc type dialog.
@@ -248,7 +244,6 @@ public class DataEditorForm implements MetadataTreeTableInterface, RulesetSetupI
         this.changeDocStrucTypeDialog = new ChangeDocStrucTypeDialog(this);
         this.editPagesDialog = new EditPagesDialog(this);
         this.uploadFileDialog = new UploadFileDialog(this);
-        acquisitionStage = "edit";
     }
 
     /**
@@ -644,7 +639,7 @@ public class DataEditorForm implements MetadataTreeTableInterface, RulesetSetupI
 
     @Override
     public String getAcquisitionStage() {
-        return acquisitionStage;
+        return EDIT;
     }
 
     /**

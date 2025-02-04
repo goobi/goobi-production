@@ -11,6 +11,8 @@
 
 package org.kitodo.dataeditor;
 
+import static org.kitodo.constants.StringConstants.KITODO;
+
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 /**
@@ -26,7 +28,6 @@ public class MetsKitodoNamespacePrefixMapper extends NamespacePrefixMapper {
     private static final String XLINK_PREFIX = "xlink";
     private static final String XLINK_URI = "http://www.w3.org/1999/xlink";
 
-    private static final String KITODO_PREFIX = "kitodo";
     private static final String KITODO_URI = "http://meta.kitodo.org/v1/";
 
     @Override
@@ -36,7 +37,7 @@ public class MetsKitodoNamespacePrefixMapper extends NamespacePrefixMapper {
         } else if (XLINK_URI.equals(namespaceUri)) {
             return XLINK_PREFIX;
         } else if (KITODO_URI.equals(namespaceUri)) {
-            return KITODO_PREFIX;
+            return KITODO;
         }
         return suggestion;
     }

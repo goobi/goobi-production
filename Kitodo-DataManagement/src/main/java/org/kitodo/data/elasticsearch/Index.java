@@ -11,6 +11,8 @@
 
 package org.kitodo.data.elasticsearch;
 
+import static org.kitodo.constants.StringConstants.KITODO;
+
 import javax.persistence.Table;
 
 import org.kitodo.config.ConfigMain;
@@ -31,7 +33,7 @@ public abstract class Index {
      */
     public Index(Class<?> beanClass) {
         Table table = beanClass.getAnnotation(Table.class);
-        this.index = ConfigMain.getParameter("elasticsearch.index", "kitodo");
+        this.index = ConfigMain.getParameter("elasticsearch.index", KITODO);
         this.setType(table.name());
     }
 
@@ -42,7 +44,7 @@ public abstract class Index {
      *            as String
      */
     public Index(String type) {
-        this.index = ConfigMain.getParameter("elasticsearch.index", "kitodo");
+        this.index = ConfigMain.getParameter("elasticsearch.index", KITODO);
         this.setType(type);
     }
 

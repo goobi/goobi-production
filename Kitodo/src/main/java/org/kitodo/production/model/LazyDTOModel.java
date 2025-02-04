@@ -12,6 +12,7 @@
 package org.kitodo.production.model;
 
 import static java.lang.Math.toIntExact;
+import static org.kitodo.constants.StringConstants.KITODO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class LazyDTOModel extends LazyDataModel<Object> {
      *            source
      */
     public LazyDTOModel(SearchDatabaseService searchService) {
-        indexRestClient.setIndexBase(ConfigMain.getParameter("elasticsearch.index", "kitodo"));
+        indexRestClient.setIndexBase(ConfigMain.getParameter("elasticsearch.index", KITODO));
         this.searchService = searchService;
 
         try {

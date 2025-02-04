@@ -15,6 +15,7 @@ package org.kitodo.production.services.command;
 import static java.lang.System.lineSeparator;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
+import static org.kitodo.constants.StringConstants.CREATE;
 
 // base Java
 import java.io.IOException;
@@ -296,7 +297,7 @@ final class ImportingProcess {
      */
     private String formProcessTitle(RulesetManagementInterface ruleset, Workpiece workpiece) {
         Optional<String> processTitleAttribute = ruleset
-                .getStructuralElementView(baseType, "create", NewspaperProcessesGenerator.ENGLISH).getProcessTitle();
+                .getStructuralElementView(baseType, CREATE, NewspaperProcessesGenerator.ENGLISH).getProcessTitle();
         if (processTitleAttribute.isEmpty()) {
             errors.add(Helper.getTranslation("kitodoScript.importProcesses.noProcessTitleRule", baseType));
             return null;
