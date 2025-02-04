@@ -148,7 +148,7 @@ public class KitodoServiceLoader<T> {
                 try (JarFile jarFile = new JarFile(f.toString())) {
                     if (hasFrontendFiles(jarFile)) {
                         Enumeration<JarEntry> entries = jarFile.entries();
-                        URL[] urls = {new URL("jar:file:" + f.toString() + "!/") };
+                        URL[] urls = {new URL("jar:file:" + f + "!/") };
                         try (URLClassLoader cl = URLClassLoader.newInstance(urls)) {
                             while (entries.hasMoreElements()) {
                                 JarEntry je = entries.nextElement();

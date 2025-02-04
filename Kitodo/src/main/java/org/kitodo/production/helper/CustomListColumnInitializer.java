@@ -60,8 +60,8 @@ public class CustomListColumnInitializer {
             logger.error("Unable to update custom list columns in database!");
         } catch (NoSuchElementException e) {
             logger.info("Configuration key '"
-                    + ParameterCore.PROCESS_PROPERTIES.toString()
-                    + "' or '" + ParameterCore.TASK_CUSTOM_COLUMNS.toString()
+                    + ParameterCore.PROCESS_PROPERTIES
+                    + "' or '" + ParameterCore.TASK_CUSTOM_COLUMNS
                     + "' not found in configuration => unable to load corresponding custom columns!");
         }
     }

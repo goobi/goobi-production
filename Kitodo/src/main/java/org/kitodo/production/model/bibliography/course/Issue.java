@@ -532,7 +532,7 @@ public class Issue {
         result.append(daysOfWeek.contains(DayOfWeek.SUNDAY.getValue()) ? 'S' : '-');
         result.append(") +");
         if (additions.size() <= 5) {
-            result.append(additions.toString());
+            result.append(additions);
         } else {
             result.append("[…(");
             result.append(additions.size());
@@ -540,7 +540,7 @@ public class Issue {
         }
         result.append(" -");
         if (exclusions.size() <= 5) {
-            result.append(exclusions.toString());
+            result.append(exclusions);
         } else {
             result.append("[…(");
             result.append(exclusions.size());

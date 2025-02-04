@@ -39,8 +39,8 @@ interface TypeInterface {
         try {
             return (Boolean) jsonObject.get(this.toString());
         } catch (ClassCastException | NullPointerException e) {
-            throw new DataException("Not possible to retrieve boolean value for key " + this.toString()
-                    + ". Exception: " + e.getMessage());
+            throw new DataException("Not possible to retrieve boolean value for key " + this + ". Exception: "
+                    + e.getMessage());
         }
     }
 
@@ -55,8 +55,8 @@ interface TypeInterface {
         try {
             return (Integer) jsonObject.get(this.toString());
         } catch (ClassCastException | NullPointerException e) {
-            throw new DataException("Not possible to retrieve int value for key " + this.toString()
-                    + ". Exception: " + e.getMessage());
+            throw new DataException("Not possible to retrieve int value for key " + this + ". Exception: "
+                    + e.getMessage());
         }
     }
 
@@ -71,8 +71,8 @@ interface TypeInterface {
         try {
             return (double) jsonObject.get(this.toString());
         } catch (ClassCastException | NullPointerException e) {
-            throw new DataException("Not possible to retrieve double value for key " + this.toString()
-                    + ". Exception: " + e.getMessage());
+            throw new DataException("Not possible to retrieve double value for key " + this + ". Exception: "
+                    + e.getMessage());
         }
     }
 
@@ -87,8 +87,8 @@ interface TypeInterface {
         try {
             return (String) jsonObject.get(this.toString());
         } catch (ClassCastException | NullPointerException e) {
-            throw new DataException("Not possible to retrieve String value for key " + this.toString()
-                    + ". Exception: " + e.getMessage());
+            throw new DataException("Not possible to retrieve String value for key " + this + ". Exception: "
+                    + e.getMessage());
         }
     }
 
@@ -104,8 +104,8 @@ interface TypeInterface {
         try {
             return (List<Map<String, Object>>) jsonObject.get(this.toString());
         } catch (ClassCastException | NullPointerException e) {
-            throw new DataException("Not possible to retrieve JsonArray value for key " + this.toString()
-                    + ". Exception: " + e.getMessage());
+            throw new DataException("Not possible to retrieve JsonArray value for key " + this + ". Exception: "
+                    + e.getMessage());
         }
     }
 
@@ -121,8 +121,8 @@ interface TypeInterface {
             try {
                 return ((List) object.get(this.toString())).size();
             } catch (ClassCastException | NullPointerException e) {
-                throw new DataException("Not possible to retrieve size of array for key " + this.toString()
-                        + ". Exception: " + e.getMessage());
+                throw new DataException("Not possible to retrieve size of array for key " + this + ". Exception: "
+                        + e.getMessage());
             }
         }
         return 0;

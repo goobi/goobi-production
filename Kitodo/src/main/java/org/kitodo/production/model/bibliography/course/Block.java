@@ -633,11 +633,11 @@ public class Block {
     public String toString() {
         StringBuilder result = new StringBuilder();
         if (Objects.nonNull(firstAppearance)) {
-            result.append(firstAppearance.toString());
+            result.append(firstAppearance);
         }
         result.append(" - ");
         if (Objects.nonNull(lastAppearance)) {
-            result.append(lastAppearance.toString());
+            result.append(lastAppearance);
         }
         result.append(" [");
         boolean first = true;

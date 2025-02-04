@@ -262,7 +262,7 @@ public class DivXmlElementAccess extends LogicalDivision {
         Optional<MdSecType> optionalDmdSec = createMdSec(super.getMetadata(), MdSec.DMD_SEC);
         if (optionalDmdSec.isPresent()) {
             MdSecType dmdSec = optionalDmdSec.get();
-            String name = metsReferrerId + ':' + MdSec.DMD_SEC.toString();
+            String name = metsReferrerId + ':' + MdSec.DMD_SEC;
             dmdSec.setID(KitodoUUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8)));
             mets.getDmdSec().add(dmdSec);
             div.getDMDID().add(dmdSec);
