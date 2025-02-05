@@ -315,7 +315,7 @@
             </resource>
             <resource>
                 <!-- ATTENTION! we need the config-local declaration at first cause it shall be placed as last resource in the classpath -->
-                <directory>../config-local</directory>
+                <directory>${maven.multiModuleProjectDirectory}/config-local</directory>
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
