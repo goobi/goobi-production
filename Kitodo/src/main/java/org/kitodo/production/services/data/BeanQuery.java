@@ -19,13 +19,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kitodo.data.database.beans.BaseBean;
+import org.kitodo.data.database.beans.Process;
 import org.kitodo.data.database.beans.Role;
 import org.kitodo.production.enums.ProcessState;
+import org.kitodo.production.services.ServiceManager;
+import org.kitodo.production.services.index.IndexingService;
 import org.primefaces.model.SortOrder;
 
 /**
@@ -33,11 +37,15 @@ import org.primefaces.model.SortOrder;
  */
 public class BeanQuery {
     private static final Pattern EXPLICIT_ID_SEARCH = Pattern.compile("id:(\\d+)");
-    private final String objectClass;
+    private final FilterService fileterService = ServiceManager.getFilterService();
+    private final IndexingService indexingService = ServiceManager.getIndexingService();
+    private final Class<? extends BaseBean> beanClass;
+    private final String className;
     private final String varName;
     private final Collection<String> extensions = new ArrayList<>();
     private final Collection<String> restrictions = new ArrayList<>();
     private Pair<String, String> sorting = Pair.of("id", "ASC");
+    private final Map<String, Pair<FilterField, String>> indexQueries = new HashMap<>();
     private final Map<String, Object> parameters = new HashMap<>();
 
     /**
@@ -47,8 +55,9 @@ public class BeanQuery {
      *            class of beans to search for
      */
     public BeanQuery(Class<? extends BaseBean> beanClass) {
-        objectClass = beanClass.getSimpleName();
-        varName = objectClass.toLowerCase();
+        this.beanClass = beanClass;
+        className = beanClass.getSimpleName();
+        varName = className.toLowerCase();
     }
 
     /**
@@ -153,7 +162,7 @@ public class BeanQuery {
             Matcher idSearchInput = EXPLICIT_ID_SEARCH.matcher(searchInput);
             if (idSearchInput.matches()) {
                 Integer expectedId = Integer.valueOf(idSearchInput.group(1));
-                if (objectClass.equals("Task")) {
+                if (className.equals("Task")) {
                     restrictions.add(varName + ".process.id = :id");
                 } else {
                     restrictions.add(varName + ".id = :id");
@@ -172,13 +181,26 @@ public class BeanQuery {
     }
 
     /**
+     * Searches the index and inserts the IDs into the HQL query parameters.
+     */
+    public void performIndexSearches() {
+        for (var iterator = indexQueries.entrySet().iterator(); iterator.hasNext();) {
+            Entry<String, Pair<FilterField, String>> entry = iterator.next();
+            Collection<Integer> ids = indexingService.searchIds(beanClass, entry.getValue().getLeft().getSearchField(),
+                entry.getValue().getRight());
+            parameters.put(entry.getKey(), ids);
+            iterator.remove();
+        }
+    }
+
+    /**
      * Requires that the query only find objects owned by the specified client.
      * 
      * @param sessionClientId
      *            client record number
      */
     public void restrictToClient(int sessionClientId) {
-        switch (objectClass) {
+        switch (className) {
             case "Docket":
             case "Project":
             case "Ruleset":
@@ -193,8 +215,8 @@ public class BeanQuery {
                 restrictions.add(varName + ".process.project.client.id = :sessionClientId");
                 break;
             default:
-                throw new IllegalStateException("BeanQuery.restrictToClient() not yet implemented for "
-                    .concat(objectClass));
+                throw new IllegalStateException("BeanQuery.restrictToClient() not yet implemented for ".concat(
+                    className));
         }
         parameters.put("sessionClientId", sessionClientId);
     }
@@ -216,7 +238,7 @@ public class BeanQuery {
      *            record numbers of the projects to which the hits may belong
      */
     public void restrictToProjects(Collection<Integer> projectIDs) {
-        switch (objectClass) {
+        switch (className) {
             case "Process":
                 restrictions.add(varName + ".project.id IN (:projectIDs)");
                 break;
@@ -224,8 +246,8 @@ public class BeanQuery {
                 restrictions.add(varName + ".process.project.id IN (:projectIDs)");
                 break;
             default:
-                throw new IllegalStateException("BeanQuery.restrictToProjects() not yet implemented for "
-                    .concat(objectClass));
+                throw new IllegalStateException("BeanQuery.restrictToProjects() not yet implemented for ".concat(
+                    className));
         }
         parameters.put("projectIDs", projectIDs);
     }
@@ -266,13 +288,55 @@ public class BeanQuery {
         restrictions.add(restriction.toString());
     }
 
-    public void restrictWithUserFilterString(String s) {
-        // full user filters not yet implemented -- TODO
-        forIdOrInTitle(s);
+    /**
+     * Adds search restrictions entered by the user in the filter input.
+     * 
+     * @param filterString
+     *            user input
+     * @see "https://github.com/kitodo/kitodo-production/wiki/Suche-und-Filter"
+     */
+    public void restrictWithUserFilterString(String filterString) {
+        int userFilterCount = 0;
+        for (var groupFilter : fileterService.parse(filterString, beanClass.isAssignableFrom(Process.class))
+                .entrySet()) {
+            List<String> groupFilters = new ArrayList<>();
+            for (UserSpecifiedFilter searchFilter : groupFilter.getValue()) {
+                userFilterCount++;
+                String parameterName = "userFilter".concat(Integer.toString(userFilterCount));
+                if (searchFilter instanceof DatabaseQueryPart) {
+                    DatabaseQueryPart databaseSearchQueryPart = (DatabaseQueryPart) searchFilter;
+                    String query = databaseSearchQueryPart.getDatabaseQuery(className, varName, parameterName);
+                    if (query.contains(" AS ")) {
+                        extensions.add(query);
+                    } else {
+                        groupFilters.add(query);
+                    }
+                    databaseSearchQueryPart.addParameters(parameterName, parameters);
+                } else {
+                    IndexQueryPart indexQueryPart = (IndexQueryPart) searchFilter;
+                    indexQueryPart.putQueryParameters(varName, parameterName, indexQueries, restrictions);
+                }
+            }
+            if (groupFilters.size() == 1) {
+                restrictions.add(groupFilters.get(0));
+            } else if (groupFilters.size() > 1) {
+                restrictions.add("( " + String.join(" OR ", groupFilters) + " )");
+            }
+        }
     }
 
     public void defineSorting(String sortField, SortOrder sortOrder) {
         sorting = Pair.of(varName + '.' + sortField, SortOrder.DESCENDING.equals(sortOrder) ? "DESC" : "ASC");
+    }
+
+    /**
+     * Disables the sort order of the query. This can speed up the check whether
+     * there is <i>any</i> object for a specific search query. However, you no
+     * longer have a reliable order when navigating the result list, and should
+     * therefore only be used in special cases.
+     */
+    public void setUnordered() {
+        sorting = null;
     }
 
     /**
@@ -298,7 +362,9 @@ public class BeanQuery {
             query.append("SELECT ").append(varName).append(' ');
         }
         innerFormQuery(query);
-        query.append(" ORDER BY ").append(sorting.getKey()).append(' ').append(sorting.getValue());
+        if (Objects.nonNull(sorting)) {
+            query.append(" ORDER BY ").append(sorting.getKey()).append(' ').append(sorting.getValue());
+        }
         return query.toString();
     }
 
@@ -319,7 +385,7 @@ public class BeanQuery {
     }
 
     private void innerFormQuery(StringBuilder query) {
-        query.append("FROM ").append(objectClass).append(" AS ").append(varName);
+        query.append("FROM ").append(className).append(" AS ").append(varName);
         for (String extension : extensions) {
             query.append(" INNER JOIN ").append(extension);
         }
@@ -332,7 +398,17 @@ public class BeanQuery {
         }
     }
 
+    /**
+     * Returns the query parameters.
+     * 
+     * @return the query parameters
+     * @throws IllegalStateException
+     *             if index queries still need to be made for parameterization
+     */
     public Map<String, Object> getQueryParameters() {
+        if (!indexQueries.isEmpty()) {
+            throw new IllegalStateException("index searches not yet performed");
+        }
         return parameters;
     }
 
@@ -342,8 +418,8 @@ public class BeanQuery {
         boolean upperCase = false;
         while (inputIterator.current() != CharacterIterator.DONE) {
             char currentChar = inputIterator.current();
-            if (currentChar < '0' || (currentChar > '9' && currentChar < 'A')
-                    || (currentChar > 'Z' && currentChar < 'a') || currentChar > 'z') {
+            if (currentChar < '0' || (currentChar > '9' && currentChar < 'A') || (currentChar > 'Z'
+                    && currentChar < 'a') || currentChar > 'z') {
                 upperCase = true;
             } else {
                 result.append(upperCase ? Character.toUpperCase(currentChar) : Character.toLowerCase(currentChar));

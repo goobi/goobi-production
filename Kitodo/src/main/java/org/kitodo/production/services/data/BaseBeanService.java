@@ -14,6 +14,7 @@ package org.kitodo.production.services.data;
 import io.reactivex.annotations.CheckReturnValue;
 
 import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -97,9 +98,13 @@ public abstract class BaseBeanService<T extends BaseBean, S extends BaseDAO<T>> 
      * @return the data objects to be displayed
      * @throws DAOException
      *             if processes cannot be loaded from search index
+     * @throws UnsupportedOperationException
+     *             if the function is not offered by the implementing class
      */
-    public abstract List loadData(int offset, int limit, String sortField, SortOrder sortOrder, Map<?, String> filters)
-            throws DAOException;
+    public List<T> loadData(int offset, int limit, String sortField, SortOrder sortOrder, Map<?, String> filters)
+            throws DAOException {
+        throw new UnsupportedOperationException("optional operation");
+    }
 
     /**
      * Stores an object in the database.
@@ -194,10 +199,12 @@ public abstract class BaseBeanService<T extends BaseBean, S extends BaseDAO<T>> 
      * @return the number of matching objects
      * @throws DAOException
      *             that can be caused by Hibernate
-     * @throws DAOException
-     *             that can be caused by ElasticSearch
+     * @throws UnsupportedOperationException
+     *             if the function is not offered by the implementing class
      */
-    public abstract Long countResults(Map<?, String> filters) throws DAOException;
+    public Long countResults(Map<?, String> filters) throws DAOException {
+        throw new UnsupportedOperationException("optional operation");
+    }
 
     /**
      * Gets an object by its database record number.

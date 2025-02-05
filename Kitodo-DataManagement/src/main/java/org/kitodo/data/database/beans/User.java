@@ -26,7 +26,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.kitodo.data.database.persistence.UserDAO;
 
 @Entity
@@ -34,15 +33,12 @@ import org.kitodo.data.database.persistence.UserDAO;
 public class User extends BaseBean {
 
     @Column(name = "name")
-    @GenericField
     private String name;
 
     @Column(name = "surname")
-    @GenericField
     private String surname;
 
     @Column(name = "login", unique = true)
-    @GenericField
     private String login;
 
     @Column(name = "ldapLogin")

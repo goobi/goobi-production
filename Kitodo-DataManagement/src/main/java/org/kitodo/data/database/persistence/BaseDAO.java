@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -556,7 +557,14 @@ public abstract class BaseDAO<T extends BaseBean> implements Serializable {
                 if (parameter instanceof String) {
                     return '\'' + ((String) parameter) + '\'';
                 }
-                if (parameter instanceof AbstractCollection) {
+                if (parameter instanceof Collection) {
+                    int size = ((Collection<?>) parameter).size();
+                    /* Up to a dozen numbers are written out, but for a larger
+                    number (and that can be 500,000 IDs) only the number of
+                    elements is logged, otherwise the logging is unreadable. */
+                    if (size > 12) {
+                        return "... " + size + " elements ...";
+                    }
                     return Objects.toString(parameter).replaceFirst("^\\[(.*)\\]$", "$1");
                 }
                 return Objects.toString(parameter);

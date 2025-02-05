@@ -53,6 +53,7 @@ import org.kitodo.production.helper.tasks.TaskManager;
 import org.kitodo.production.metadata.MetadataLock;
 import org.kitodo.production.services.ServiceManager;
 import org.kitodo.production.services.data.CommentService;
+import org.kitodo.production.services.data.ProcessService;
 import org.kitodo.production.services.data.TaskService;
 import org.kitodo.production.thread.TaskScriptThread;
 
@@ -65,6 +66,7 @@ public class WorkflowControllerService {
     private static final Logger logger = LogManager.getLogger(WorkflowControllerService.class);
     private final TaskService taskService = ServiceManager.getTaskService();
     private final CommentService commentService = ServiceManager.getCommentService();
+    private final ProcessService processService = ServiceManager.getProcessService();
 
     /**
      * Set Task status up.
@@ -250,6 +252,7 @@ public class WorkflowControllerService {
         task.setProcessingEnd(new Date());
 
         taskService.save(task);
+        processService.refresh(task.getProcess());
 
         automaticTasks = new ArrayList<>();
 

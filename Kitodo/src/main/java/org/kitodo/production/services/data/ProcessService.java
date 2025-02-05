@@ -112,6 +112,7 @@ import org.kitodo.data.database.enums.CorrectionComments;
 import org.kitodo.data.database.enums.TaskStatus;
 import org.kitodo.data.database.exceptions.DAOException;
 import org.kitodo.data.database.persistence.BaseDAO;
+import org.kitodo.data.database.persistence.HibernateUtil;
 import org.kitodo.data.database.persistence.ProcessDAO;
 import org.kitodo.data.exceptions.DataException;
 import org.kitodo.exceptions.InvalidImagesException;
@@ -293,6 +294,7 @@ public class ProcessService extends BaseBeanService<Process, ProcessDAO> {
         Collection<Integer> projectIDs = ServiceManager.getUserService().getCurrentUser().getProjects().stream().filter(
             project -> showInactiveProjects || project.isActive()).map(Project::getId).collect(Collectors.toList());
         query.restrictToProjects(projectIDs);
+        query.performIndexSearches();
         return count(query.formCountQuery(), query.getQueryParameters());
     }
 
@@ -470,6 +472,7 @@ public class ProcessService extends BaseBeanService<Process, ProcessDAO> {
                 .collect(Collectors.toList());
         query.restrictToProjects(projectIDs);
         query.defineSorting(SORT_FIELD_MAPPING.get(sortField), sortOrder);
+        query.performIndexSearches();
         return getByQuery(query.formQueryForAll(), query.getQueryParameters(), offset, limit);
     }
 
@@ -632,6 +635,7 @@ public class ProcessService extends BaseBeanService<Process, ProcessDAO> {
     public Collection<?> findByTemplate(int templateId) throws DAOException {
         BeanQuery query = new BeanQuery(Process.class);
         query.addIntegerRestriction("template.id", templateId);
+        query.setUnordered();
         return getByQuery(query.formQueryForAll(), query.getQueryParameters(), 0, 1);
     }
 
@@ -804,6 +808,7 @@ public class ProcessService extends BaseBeanService<Process, ProcessDAO> {
                 .filter(project -> showInactiveProjects || project.isActive()).map(Project::getId)
                 .collect(Collectors.toList());
         query.restrictToProjects(projectIDs);
+        query.performIndexSearches();
         return getByQuery(query.formQueryForAll(), query.getQueryParameters());
     }
 

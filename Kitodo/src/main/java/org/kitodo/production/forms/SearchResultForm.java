@@ -12,6 +12,8 @@
 package org.kitodo.production.forms;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +55,6 @@ public class SearchResultForm extends ProcessListBaseView {
     private String currentTaskFilter;
     private Integer currentProjectFilter;
     private Integer currentTaskStatusFilter;
-    private final String searchResultListPath = MessageFormat.format(REDIRECT_PATH, "searchResult");
     private final WorkflowControllerService workflowControllerService = new WorkflowControllerService();
 
     /**
@@ -62,25 +63,7 @@ public class SearchResultForm extends ProcessListBaseView {
      * @return The searchResultPage
      */
     public String searchForProcessesBySearchQuery() {
-        ProcessService processService = ServiceManager.getProcessService();
-        HashMap<Integer, Process> resultHash = new HashMap<>();
-        List<Process> results;
-        try {
-            results = processService.findByAnything(searchQuery);
-            for (Process process : results) {
-                resultHash.put(process.getId(), process);
-            }
-            this.resultList = new ArrayList<>(resultHash.values());
-            refreshFilteredList();
-        } catch (DataException e) {
-            Helper.setErrorMessage("errorOnSearch", searchQuery);
-            return this.stayOnCurrentPage;
-        }
-        setCurrentTaskStatusFilter(null);
-        setCurrentProjectFilter(null);
-        setCurrentTaskFilter(null);
-        resetSearchResultTableViewState();
-        return searchResultListPath;
+        return MessageFormat.format(REDIRECT_PATH, "processes") + "&input=" + searchQuery;
     }
 
     /**

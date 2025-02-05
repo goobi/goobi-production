@@ -11,10 +11,14 @@
 
 package org.kitodo.production.services.data;
 
+import static java.lang.Character.charCount;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,23 +26,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.kitodo.data.database.beans.BaseBean;
 import org.kitodo.data.database.beans.Filter;
+import org.kitodo.data.database.beans.Process;
 import org.kitodo.data.database.beans.Project;
 import org.kitodo.data.database.beans.User;
 import org.kitodo.data.database.enums.TaskStatus;
 import org.kitodo.data.database.exceptions.DAOException;
 import org.kitodo.data.database.persistence.FilterDAO;
 import org.kitodo.data.exceptions.DataException;
-import org.kitodo.production.enums.FilterString;
 import org.kitodo.production.helper.Helper;
 import org.kitodo.production.services.ServiceManager;
 import org.primefaces.model.SortOrder;
@@ -47,12 +49,13 @@ import org.primefaces.model.SortOrder;
  * Service for Filter bean.
  */
 public class FilterService extends BaseBeanService<Filter, FilterDAO> {
-
     private static final Logger logger = LogManager.getLogger(FilterService.class);
-    private static volatile FilterService instance = null;
-    
-    private static final Pattern CONDITION_PATTERN = Pattern.compile("\\(([^\\)]+)\\)|([^\\(\\)\\|]+)");
+
+    private static final Pattern ID_SEARCH_PATTERN = Pattern.compile("\\s*(\\d+)\\s*(?:-\\s*(\\d+)\\s)?");
     public static final String FILTER_STRING = "filterString";
+    private static final String NOT_SEARCH_PREFIX = "-";
+
+    private static volatile FilterService instance = null;
 
     /**
      * Constructor with Searcher and Indexer assigning.
@@ -85,17 +88,6 @@ public class FilterService extends BaseBeanService<Filter, FilterDAO> {
         return count("SELECT COUNT(*) FROM Filter");
     }
 
-    // functions countResults() and loadData() are not used in filters
-    @Override
-    public Long countResults(Map filters) throws DAOException {
-        return (long) 0;
-    }
-
-    @Override
-    public List<Filter> loadData(int first, int pageSize, String sortField, SortOrder sortOrder, Map filters) {
-        return new ArrayList<>();
-    }
-
     /**
      * Find filters with exact value.
      *
@@ -111,147 +103,12 @@ public class FilterService extends BaseBeanService<Filter, FilterDAO> {
         throw new UnsupportedOperationException("no longer used function");
     }
 
-    /**
-     * Splits a filter into multiple alternative conditions.
-     * 
-     * @param filter
-     *            the filter string (that was enclosed in double quotes)
-     * @return a list of conditions after splitting the filter at the "|"
-     *         character
-     */
-    private List<String> splitConditions(String filter) {
-        return CONDITION_PATTERN.matcher(filter).results()
-            .flatMap(mr -> IntStream.rangeClosed(1, mr.groupCount()).mapToObj(mr::group))
-            .filter(Objects::nonNull)
-            .map(String::trim)
-            .filter(Predicate.not(String::isEmpty))
-            .collect(Collectors.toList());
-    }
-
-    private String replaceLegacyFilters(String filter) {
-        filter.replace("processproperty","property");
-        filter.replace("workpiece","property");
-        filter.replace("template","property");
-        return filter;
-    }
-
     Set<Integer> collectIds(List<BaseBean> dtos) {
         Set<Integer> ids = new HashSet<>();
         for (BaseBean process : dtos) {
             ids.add(process.getId());
         }
         return ids;
-    }
-
-    /**
-     * Get value for find objects in ElasticSearch.
-     *
-     * @param filter
-     *            as String eg. in form 'stepdone:1'
-     * @param filterString
-     *            as FilterString eg. 'stepdone:'
-     * @return value for find object '1'
-     */
-    private String getFilterValueFromFilterString(String filter, FilterString filterString) {
-        String filterEnglish = filterString.getFilterEnglish();
-        String filterGerman = filterString.getFilterGerman();
-        if (filter.contains(filterEnglish)) {
-            return prepareStrings(filter, filterEnglish).get(0);
-        } else if (filter.contains(filterGerman)) {
-            return prepareStrings(filter, filterGerman).get(0);
-        }
-        return "";
-    }
-
-    /**
-     * Get list of values for find objects in ElasticSearch.
-     *
-     * @param filter
-     *            as String eg. in form 'stepdone:1 2 3'
-     * @param filterString
-     *            as FilterString e.g. 'stepdone:'
-     * @return list of values for find objects e.g. '1' '2' and so on
-     */
-    private List<String> getFilterValuesFromFilterString(String filter, FilterString filterString) {
-        String filterEnglish = filterString.getFilterEnglish();
-        String filterGerman = filterString.getFilterGerman();
-        List<String> filterValues = new ArrayList<>();
-        if (filter.contains(filterEnglish)) {
-            filterValues = prepareStrings(filter, filterEnglish);
-        } else if (filter.contains(filterGerman)) {
-            filterValues = prepareStrings(filter, filterGerman);
-        }
-        return filterValues;
-    }
-
-    /**
-     * Prepare list of values for given filter. Regexp checks if it contains
-     * only numbers and white spaces. In that case it treats it as list of ids.
-     * If value contains words and white spaces or single word it treats it as
-     * text search.
-     *
-     * @param filter
-     *            full filter String
-     * @param filterName
-     *            String which contains only name of filter e.g. 'stepdone:'
-     * @return list of values, in case if string this list has size one
-     */
-    private List<String> prepareStrings(String filter, String filterName) {
-        List<String> filterValues = new ArrayList<>();
-        String filterValue = filter.substring(filter.indexOf(filterName));
-        filterValue = filterValue.substring(filterName.lastIndexOf(':') + 1);
-        if (filterValue.matches("^[\\s\\d]+$")) {
-            filterValues.addAll(Arrays.asList(filterValue.split("\\s+")));
-        } else {
-            filterValues.add(filterValue);
-        }
-        return filterValues;
-    }
-
-    /**
-     * Filters for properties are special type. They can contain two times :
-     * e.g. 'processproperty:title:value'.
-     *
-     * @param filter
-     *            full filter String
-     * @param filterString
-     *            contains only name of filter e.g. 'processproperty:' as String
-     * @return list of values in format property title and property value or
-     *         only property value
-     */
-    private List<String> getFilterValueFromFilterStringForProperty(String filter, FilterString filterString) {
-        List<String> titleValue = new ArrayList<>();
-        String filterEnglish = filterString.getFilterEnglish();
-        String filterGerman = filterString.getFilterGerman();
-        if (filter.contains(filterEnglish)) {
-            titleValue = prepareStringsForProperty(filter, filterEnglish);
-        } else if (filter.contains(filterGerman)) {
-            titleValue = prepareStringsForProperty(filter, filterGerman);
-        }
-        return titleValue;
-    }
-
-    /**
-     * Prepare list of values in format property title and property value or
-     * only property value.
-     *
-     * @param filter
-     *            full filter String
-     * @param filterName
-     *            contains only name of filter e.g. 'processproperty:' as String
-     * @return list of values in format property title and property value or
-     *         only property value.
-     */
-    private List<String> prepareStringsForProperty(String filter, String filterName) {
-        List<String> titleValue = new ArrayList<>();
-        String filterValue = filter.replace(filterName, "");
-        if (filterValue.contains(":")) {
-            titleValue.add(filterValue.substring(0, filterValue.lastIndexOf(':')));
-            titleValue.add(filterValue.substring(filterValue.lastIndexOf(':') + 1));
-        } else {
-            titleValue.add(filterValue);
-        }
-        return titleValue;
     }
 
     /**
@@ -273,143 +130,6 @@ public class FilterService extends BaseBeanService<Filter, FilterDAO> {
             }
         }
         return filters;
-    }
-
-    /**
-     * Evaluate FilterString objects in both possible languages.
-     *
-     * @param stringFilterString
-     *            full filter String
-     * @param filterString
-     *            as FilterString object
-     * @param prefix
-     *            possible prefix is '-', if prefix not null it means that we
-     *            are filtering for negated value
-     * @return true or false
-     */
-    private boolean evaluateFilterString(String stringFilterString, FilterString filterString, String prefix) {
-        String lowerCaseFilterString = stringFilterString.toLowerCase();
-        if (Objects.nonNull(prefix)) {
-            return lowerCaseFilterString.startsWith(prefix + filterString.getFilterEnglish())
-                    || lowerCaseFilterString.startsWith(prefix + filterString.getFilterGerman());
-        }
-        return lowerCaseFilterString.startsWith(filterString.getFilterEnglish())
-                || lowerCaseFilterString.startsWith(filterString.getFilterGerman());
-    }
-
-    private void logError(String filter) {
-        logger.error("filter part '{}' in '{}' caused an error", filter.substring(filter.indexOf(':') + 1), filter);
-    }
-
-    /**
-     * This function analyzes the parameters on a task filter and returns a
-     * TaskFilter enum to direct further processing it reduces the necessity to
-     * apply some filter keywords.
-     *
-     * @param parameters
-     *            String
-     * @return TaskFilter
-     */
-    private static TaskFilter getTaskFilter(String parameters) {
-
-        if (parameters.contains("-")) {
-            String[] strArray = parameters.split("-");
-            if (Arrays.stream(strArray).allMatch(StringUtils::isNumeric)) {
-                if (strArray.length >= 2) {
-                    if (strArray[0].length() == 0) {
-                        return TaskFilter.MAX;
-                    } else {
-                        return TaskFilter.RANGE;
-                    }
-                } else {
-                    return TaskFilter.MIN;
-                }
-            } else {
-                return TaskFilter.NAME;
-            }
-        } else if (!parameters.isEmpty() && StringUtils.isNumeric(parameters)) {
-            return TaskFilter.EXACT;
-        } else {
-            return TaskFilter.NAME;
-        }
-    }
-
-    /**
-     * This enum represents the result of parsing the step&lt;modifier&gt;:
-     * filter Restrictions.
-     */
-    private enum TaskFilter {
-        EXACT,
-        RANGE,
-        MIN,
-        MAX,
-        NAME,
-        UNKNOWN
-    }
-
-    /**
-     * Filter processes by ids.
-     *
-     * @param filter
-     *            part of filter string to use
-     * @param filterString
-     *            as FilterString
-     * @return set of ids as Integers
-     */
-    private Set<Integer> filterValuesAsIntegers(String filter, FilterString filterString) {
-        Set<Integer> ids = new HashSet<>();
-        List<String> stringIds = getFilterValuesFromFilterString(filter, filterString);
-        for (String tempId : stringIds) {
-            if (!tempId.isEmpty() && StringUtils.isNumeric(tempId)) {
-                Integer id = Integer.parseInt(tempId);
-                ids.add(id);
-            }
-        }
-        return ids;
-    }
-
-    /**
-     * Filter processes by Ids.
-     *
-     * @param filter
-     *            part of filter string to use
-     * @param filterString
-     *            as FilterString
-     * @return set of values as Strings
-     */
-    private Set<String> filterValuesAsStrings(String filter, FilterString filterString) {
-        Set<String> ids = new HashSet<>();
-        List<String> stringIds = getFilterValuesFromFilterString(filter, filterString);
-        if (!stringIds.isEmpty()) {
-            ids.addAll(stringIds);
-        }
-        return ids;
-    }
-
-    /**
-     * This functions extracts the Integer from the parameters passed with the
-     * step filter in first position.
-     *
-     * @param parameter
-     *            the string, where the integer should be extracted
-     * @return Integer
-     */
-    private Integer getTaskStart(String parameter) {
-        String[] strArray = parameter.split("-");
-        return Integer.parseInt(strArray[0]);
-    }
-
-    /**
-     * This functions extracts the Integer from the parameters passed with the
-     * step filter in last position.
-     *
-     * @param parameter
-     *            String
-     * @return Integer
-     */
-    private Integer getTaskEnd(String parameter) {
-        String[] strArray = parameter.split("-");
-        return Integer.parseInt(strArray[1]);
     }
 
     /**
@@ -549,5 +269,180 @@ public class FilterService extends BaseBeanService<Filter, FilterDAO> {
             Helper.setErrorMessage("errorLoadingMany", new Object[] {Helper.getTranslation("activeUsers") }, logger, e);
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Parses a filter string of the user search query. The resulting map
+     * consists of user filters grouped by filter fields. If there are multiple
+     * search queries for the same field, these are to be ORed. One user filter
+     * can contain multiple search terms, which are ANDed in the index, or
+     * searched in whole in the database.
+     * 
+     * @param filterString
+     *            user input in the filter box
+     * @param indexed
+     *            whether the object class is indexed. Then, if possible, index
+     *            queries are created. {@code true} for {@link Process}es, else
+     *            {@code false}
+     * @return map of search on filter field
+     */
+    public Map<FilterField, Collection<UserSpecifiedFilter>> parse(String filterString, boolean indexed) {
+        var filters = new EnumMap<FilterField, Collection<UserSpecifiedFilter>>(FilterField.class);
+        for (UserSpecifiedFilter filter : parseFilters(filterString, indexed)) {
+            filters.computeIfAbsent(filter.getFilterField(), missingFilter -> new ArrayList<>()).add(filter);
+        }
+        return filters;
+    }
+
+    /**
+     * Detects whether there are groups enclosed in quotation marks. A closing
+     * quotation mark at the end may also be missing. Outside of quotation
+     * marks, spaces are a token separator, inside they are not.
+     * 
+     * @param filter
+     *            user-entered filter
+     * @param indexed
+     *            whether the object class is indexed
+     * @return search token
+     */
+    static List<UserSpecifiedFilter> parseFilters(String filter, boolean indexed) {
+        List<UserSpecifiedFilter> queryTokens = new ArrayList<>();
+        StringBuilder tokenCollector = new StringBuilder();
+        boolean inQuotes = false;
+        for (int offset = 0; offset < filter.length(); offset += charCount(filter.codePointAt(offset))) {
+            int glyph = filter.codePointAt(offset);
+            if (glyph == '"') {
+                inQuotes = !inQuotes;
+            } else if (!inQuotes && glyph <= ' ') {
+                if (tokenCollector.length() > 0) {
+                    queryTokens.addAll(parseParentheses(tokenCollector, indexed));
+                    tokenCollector = new StringBuilder();
+                }
+            } else {
+                // add characters, but no spaces at the beginning
+                if (tokenCollector.length() > 0 || glyph > ' ') {
+                    tokenCollector.appendCodePoint(glyph);
+                }
+            }
+        }
+        trimRight(tokenCollector);
+        if (tokenCollector.length() > 0) {
+            UserSpecifiedFilter userSpecifiedFilter = parseQueryPart(tokenCollector.toString(), indexed);
+            if (Objects.nonNull(userSpecifiedFilter)) {
+                queryTokens.add(userSpecifiedFilter);
+            }
+        }
+        logger.debug("`{}´ -> {}", filter, queryTokens);
+        return queryTokens;
+    }
+
+    /**
+     * Within a sequence marked with quotation marks, there can be inner groups
+     * marked with parentheses. Within the sequence delimited by quotation
+     * marks, a vertical bar is a separator, but within the parentheses, it is
+     * not.
+     * 
+     * @param input
+     *            a group that was marked with quotation marks
+     * @param indexed
+     *            whether the object class is indexed
+     * @return search token
+     */
+    private static List<UserSpecifiedFilter> parseParentheses(StringBuilder input, boolean indexed) {
+        List<UserSpecifiedFilter> queryTokens = new ArrayList<>();
+        StringBuilder tokenCollector = new StringBuilder();
+        boolean inParentheses = false;
+        for (int offset = 0; offset < input.length(); offset += charCount(input.codePointAt(offset))) {
+            int glyph = input.codePointAt(offset);
+            if (glyph == '(' && !inParentheses) {
+                inParentheses = !inParentheses;
+            } else if (glyph == ')' && inParentheses) {
+                inParentheses = !inParentheses;
+            } else if (!inParentheses && glyph == '|') {
+                if (tokenCollector.length() > 0) {
+                    trimRight(tokenCollector);
+                    queryTokens.add(parseQueryPart(tokenCollector.toString(), indexed));
+                    tokenCollector = new StringBuilder();
+                }
+            } else {
+                // no spaces at the beginning
+                if (tokenCollector.length() > 0 || glyph > ' ') {
+                    tokenCollector.appendCodePoint(glyph);
+                }
+            }
+        }
+        if (tokenCollector.length() > 0) {
+            trimRight(tokenCollector);
+            queryTokens.add(parseQueryPart(tokenCollector.toString(), indexed));
+        }
+        return queryTokens;
+    }
+
+    /**
+     * Everything that belongs together according to the above rules is now
+     * processed as one search token.
+     * 
+     * <p>
+     * Search syntax: A preceding minus sign indicates {@code not}-search. The
+     * search query can be either be words, or a fielded search. A search field
+     * is preceded by its name and a colon. There are index search fields for
+     * metadata, which are searched for using pseudowords in the index, and
+     * there are program search fields, which can be on the index or in the
+     * database. A special feature is that the program search fields also allow
+     * the ID selection of an ID or an ID range.
+     * 
+     * @param item
+     *            item to search
+     * @param indexed
+     *            whether the object class is indexed
+     * @return filter for search item, or {@code null} if it doesn’t make sense
+     */
+    private static UserSpecifiedFilter parseQueryPart(String item, boolean indexed) {
+        boolean substract = item.startsWith(NOT_SEARCH_PREFIX);
+        if (substract) {
+            item = item.substring(1, item.length());
+        }
+        boolean operand = !substract;
+
+        int colon = item.indexOf(":");
+        if (colon < 0) {
+            return new IndexQueryPart(FilterField.SEARCH, item.toString(), operand);
+        }
+        String fieldName = item.substring(0, colon).toLowerCase();
+        String value = item.substring(colon + 1);
+        FilterField filterField = FilterField.ofString(fieldName);
+        if (Objects.isNull(filterField)) {
+            return new IndexQueryPart(fieldName, FilterField.SEARCH, value, operand);
+        }
+
+        Matcher idSearch = ID_SEARCH_PATTERN.matcher(value);
+        if (idSearch.matches()) {
+            return new DatabaseIdQueryPart(filterField, idSearch.group(1), idSearch.group(2), operand);
+        }
+
+        if (indexed && Objects.nonNull(filterField.getSearchField())) {
+            return new IndexQueryPart(filterField, value, operand);
+        } else {
+            return new DatabaseQueryPart(filterField, value, operand);
+        }
+
+    }
+
+    /**
+     * Removes tailing spaces in a string builder.
+     * 
+     * @param stringBuilder
+     *            to modified string builder
+     */
+    private static void trimRight(StringBuilder stringBuilder) {
+        // remove spaces at the end
+        int lastPos = stringBuilder.length() - 1;
+        do {
+            if (lastPos < 0 || stringBuilder.charAt(lastPos) > ' ') {
+                break;
+            }
+            stringBuilder.setLength(lastPos);
+            lastPos--;
+        } while (lastPos >= 0);
     }
 }

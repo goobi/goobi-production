@@ -43,6 +43,7 @@ import org.kitodo.data.database.enums.TaskEditType;
 import org.kitodo.data.database.enums.TaskStatus;
 import org.kitodo.data.database.exceptions.DAOException;
 import org.kitodo.data.database.persistence.BaseDAO;
+import org.kitodo.data.database.persistence.HibernateUtil;
 import org.kitodo.data.database.persistence.TaskDAO;
 import org.kitodo.data.exceptions.DataException;
 import org.kitodo.exceptions.InvalidImagesException;
@@ -171,6 +172,7 @@ public class TaskService extends BaseBeanService<Task, TaskDAO> {
             boolean showAutomaticTasks, List<TaskStatus> taskStatus) throws DAOException {
 
         BeanQuery query = formBeanQuery(filters, onlyOwnTasks, hideCorrectionTasks, showAutomaticTasks, taskStatus);
+        query.performIndexSearches();
         return count(query.formCountQuery(), query.getQueryParameters());
     }
 
@@ -251,6 +253,7 @@ public class TaskService extends BaseBeanService<Task, TaskDAO> {
 
         BeanQuery query = formBeanQuery(filters, onlyOwnTasks, hideCorrectionTasks, showAutomaticTasks, taskStatus);
         query.defineSorting(SORT_FIELD_MAPPING.get(sortField), sortOrder);
+        query.performIndexSearches();
         return getByQuery(query.formQueryForAll(), query.getQueryParameters(), offset, limit);
     }
 

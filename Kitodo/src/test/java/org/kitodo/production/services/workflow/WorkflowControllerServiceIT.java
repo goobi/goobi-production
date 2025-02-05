@@ -372,15 +372,20 @@ public class WorkflowControllerServiceIT {
         workflowService.close(taskToClose);
 
         assertEquals("Task '" + taskToClose.getTitle() + "' was not closed!", TaskStatus.DONE,
-                taskToClose.getProcessingStatus());
+            taskToClose.getProcessingStatus());
+        taskService.refresh(skippedTask);
         assertEquals("Task '" + skippedTask.getTitle() + "' was not skipped!", TaskStatus.DONE,
                 skippedTask.getProcessingStatus());
+        taskService.refresh(secondSkippedTask);
         assertEquals("Task '" + secondSkippedTask.getTitle() + "' was not skipped!", TaskStatus.DONE,
                 secondSkippedTask.getProcessingStatus());
+        taskService.refresh(taskToOpen);
         assertEquals("Task '" + taskToOpen.getTitle() + "' was not opened!", TaskStatus.OPEN,
                 taskToOpen.getProcessingStatus());
+        taskService.refresh(secondTaskToOpen);
         assertEquals("Task '" + secondTaskToOpen.getTitle() + "' was not opened!", TaskStatus.OPEN,
                 secondTaskToOpen.getProcessingStatus());
+        taskService.refresh(thirdTaskToSkip);
         assertEquals("Task '" + thirdTaskToSkip.getTitle() + "' was not skipped!", TaskStatus.DONE,
                 thirdTaskToSkip.getProcessingStatus());
 
@@ -477,6 +482,7 @@ public class WorkflowControllerServiceIT {
         ServiceManager.getCommentService().save(correctionComment);
 
         workflowService.reportProblem(correctionComment, TaskEditType.MANUAL_SINGLE);
+        ServiceManager.getCommentService().refresh(correctionComment);
         workflowService.solveProblem(correctionComment, TaskEditType.MANUAL_SINGLE);
 
         Process process = ServiceManager.getProcessService().getById(currentTask.getProcess().getId());

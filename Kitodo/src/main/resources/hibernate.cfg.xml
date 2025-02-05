@@ -37,9 +37,6 @@
         <property name="hibernate.connection.verifyServerCertificate">false</property>
         <property name="hibernate.connection.useSSL">false</property>
 
-        <!-- Hibernate search -->
-        <property name="hibernate.search.schema_management.strategy">drop-and-create</property>
-
         <!-- connection pool -->
         <property name="hibernate.c3p0.max_size">5000</property>
         <property name="hibernate.c3p0.min_size">10</property>

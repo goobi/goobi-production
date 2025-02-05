@@ -60,6 +60,9 @@ public class IndexingForm {
         }
     }
 
+    /**
+     * Sets the number of database objects.
+     */
     public static void setNumberOfDatabaseObjects() {
         for (Entry<ObjectType, IndexingRow> entry : indexingRows.entrySet()) {
             long count = 0;
@@ -186,7 +189,8 @@ public class IndexingForm {
      * @return the overall progress of the indexing process
      */
     public int getAllIndexingProgress() {
-        long numerator = 0, denominator = 0;
+        long numerator = 0;
+        long denominator = 0;
         for (IndexingRow indexingRow : indexingRows.values()) {
             if (indexingRow.getIndexed() >= 0) {
                 numerator += indexingRow.getIndexed();

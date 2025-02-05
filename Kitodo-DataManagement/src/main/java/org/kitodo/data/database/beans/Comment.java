@@ -17,12 +17,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.kitodo.data.database.enums.CommentType;
 
 @Entity
@@ -32,7 +32,6 @@ public class Comment extends BaseBean {
      * The field message holds the comment message.
      */
     @Column(name = "message", columnDefinition = "longtext")
-    @GenericField
     private String message;
 
     /**
@@ -40,7 +39,6 @@ public class Comment extends BaseBean {
      */
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
-    @GenericField
     private CommentType type;
 
     /**
@@ -65,7 +63,7 @@ public class Comment extends BaseBean {
     /**
      * This field contains information about user, which create the comment.
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "FK_comment_user_id"))
     private User author;
 

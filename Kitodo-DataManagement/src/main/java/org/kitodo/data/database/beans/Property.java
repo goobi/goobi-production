@@ -23,7 +23,6 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.kitodo.data.database.converter.PropertyTypeConverter;
 import org.kitodo.data.database.enums.PropertyType;
 import org.kitodo.data.database.persistence.PropertyDAO;
@@ -32,11 +31,9 @@ import org.kitodo.data.database.persistence.PropertyDAO;
 @Table(name = "property")
 public class Property extends BaseBean implements Comparable<Property> {
 
-    @GenericField
     @Column(name = "title")
     private String title;
 
-    @GenericField
     @Column(name = "value", columnDefinition = "longtext")
     private String value;
 

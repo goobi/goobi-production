@@ -17,22 +17,18 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
-
 /**
  * This bean contains properties common for Template and Process.
  */
 @MappedSuperclass
 public abstract class BaseTemplateBean extends BaseBean {
 
-    @GenericField
     @Column(name = "title")
     protected String title;
 
     @Column(name = "creationDate")
     protected Date creationDate;
 
-    @GenericField
     @Column(name = "sortHelperStatus")
     private String sortHelperStatus;
 

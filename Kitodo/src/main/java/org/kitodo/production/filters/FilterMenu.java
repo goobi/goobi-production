@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import javax.faces.context.FacesContext;
 
+import org.apache.commons.lang3.StringUtils;
 import org.kitodo.production.enums.FilterPart;
 import org.kitodo.production.enums.FilterString;
 import org.kitodo.production.forms.CurrentTaskForm;
@@ -296,6 +297,12 @@ public class FilterMenu {
      * @return value of filterInEditMode
      */
     public String getFilterInEditMode() {
+        Map<String, String> parameters = FacesContext.getCurrentInstance().getExternalContext()
+                .getRequestParameterMap();
+        if (parameters.containsKey("input") && StringUtils.isBlank(filterInEditMode)) {
+            filterInEditMode = parameters.get("input");
+            submitFilters();
+        }
         return filterInEditMode;
     }
 

@@ -15,41 +15,29 @@ import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
-
 @Entity
-@Indexed(index = "kitodo-ruleset")
 @Table(name = "ruleset")
 public class Ruleset extends BaseBean {
 
-    @GenericField
     @Column(name = "title")
     private String title;
 
-    @GenericField
     @Column(name = "file")
     private String file;
 
-    @GenericField
     @Column(name = "orderMetadataByRuleset")
     private Boolean orderMetadataByRuleset = false;
 
-    @GenericField
     @Column(name = "active")
     private Boolean active = true;
 
-    @ManyToOne
-    @IndexedEmbedded(includePaths = {"id", "name"})
-    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", foreignKey = @ForeignKey(name = "FK_ruleset_client_id"))
     private Client client;
 

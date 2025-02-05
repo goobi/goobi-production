@@ -230,7 +230,7 @@ public class SearchForm {
     private String createFilter() {
         String search = "";
         if (!this.processTitle.isEmpty()) {
-            search += "\"" + this.processOperand + this.processTitle + "\" ";
+            search += "\"" + this.processOperand + "process:" + this.processTitle + "\" ";
         }
         if (!this.idin.isEmpty()) {
             search += "\"" + FilterString.ID.getFilterEnglish() + this.idin + "\" ";

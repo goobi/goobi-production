@@ -29,7 +29,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.kitodo.api.imagemanagement.ImageManagementInterface;
 import org.kitodo.config.ConfigMain;
 import org.kitodo.data.database.enums.LinkingMode;
@@ -105,7 +104,6 @@ public class Folder extends BaseBean {
      * contents of this folder will be linked.
      */
     @Column(name = "fileGroup")
-    @GenericField
     private String fileGroup;
 
     /**
@@ -132,14 +130,12 @@ public class Folder extends BaseBean {
      * @see org.kitodo.config.xml.fileformats.FileFormatsConfig
      */
     @Column(name = "mimeType")
-    @GenericField
     private String mimeType = "image/jpeg";
 
     /**
      * The path to the folder in the process directory of each processes.
      */
     @Column(name = "path")
-    @GenericField
     private String path = "";
 
     /**
@@ -155,7 +151,6 @@ public class Folder extends BaseBean {
      * replaced before concatenation.
      */
     @Column(name = "urlStructure")
-    @GenericField
     private String urlStructure;
 
     /**

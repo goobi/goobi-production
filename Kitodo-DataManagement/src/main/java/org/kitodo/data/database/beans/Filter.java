@@ -21,28 +21,20 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
-
 /**
  * Filter bean.
  */
 @Entity
-@Indexed(index = "kitodo-filter")
 @Table(name = "filter")
 public class Filter extends BaseBean {
 
-    @GenericField
     @Column(name = "value", columnDefinition = "longtext")
     private String value;
 
-    @GenericField
     @Column(name = "creationDate")
     private Date creationDate;
 
     @ManyToOne
-    @IndexedEmbedded(includePaths = {"id"})
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "FK_filter_user_id"))
     private User user;
 

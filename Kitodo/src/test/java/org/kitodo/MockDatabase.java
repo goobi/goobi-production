@@ -1200,7 +1200,6 @@ public class MockDatabase {
                 task.setProcessingUser(secondUser);
                 secondUser.getProcessingTasks().add(task);
             }
-            ServiceManager.getTaskService().save(task);
             firstProcess.getTasks().add(task);
         }
 
@@ -1226,7 +1225,6 @@ public class MockDatabase {
         eleventhTask.setScriptPath("../type/automatic/script/path");
         eleventhTask.getRoles().add(role);
         role.getTasks().add(eleventhTask);
-        ServiceManager.getTaskService().save(eleventhTask);
         firstUser.getProcessingTasks().add(eleventhTask);
         secondProcess.getTasks().add(eleventhTask);
 
@@ -1241,7 +1239,6 @@ public class MockDatabase {
         twelfthTask.setProcess(secondProcess);
         twelfthTask.getRoles().add(role);
         role.getTasks().add(twelfthTask);
-        ServiceManager.getTaskService().save(twelfthTask);
         firstUser.getProcessingTasks().add(twelfthTask);
         ServiceManager.getUserService().save(firstUser);
         secondProcess.getTasks().add(twelfthTask);
@@ -1256,7 +1253,6 @@ public class MockDatabase {
         thirteenTask.setProcess(secondProcess);
         thirteenTask.getRoles().add(role);
         role.getTasks().add(thirteenTask);
-        ServiceManager.getTaskService().save(thirteenTask);
         secondProcess.getTasks().add(thirteenTask);
 
         ServiceManager.getRoleService().save(role);

@@ -24,6 +24,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.kitodo.data.database.beans.BaseTemplateBean;
 import org.kitodo.data.database.beans.Process;
+import org.kitodo.data.database.persistence.HibernateUtil;
 import org.kitodo.production.services.ServiceManager;
 import org.kitodo.production.services.data.BeanQuery;
 
@@ -63,7 +64,7 @@ public class SearchResultGeneration {
     private List<Process> getResultsWithFilter() {
         BeanQuery query = new BeanQuery(Process.class);
         if (StringUtils.isNotBlank(filter)) {
-            query.forIdOrInTitle(filter);
+            query.restrictWithUserFilterString(filter);
         }
         if (!this.showClosedProcesses) {
             query.restrictToNotCompletedProcesses();
@@ -71,6 +72,7 @@ public class SearchResultGeneration {
         if (!this.showInactiveProjects) {
             query.addBooleanRestriction("project.active", Boolean.FALSE);
         }
+        query.performIndexSearches();
         return ServiceManager.getProcessService().getByQuery(query.formQueryForAll(), query.getQueryParameters());
     }
 

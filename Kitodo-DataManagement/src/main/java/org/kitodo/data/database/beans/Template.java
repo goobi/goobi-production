@@ -30,43 +30,28 @@ import javax.persistence.Table;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import org.kitodo.data.database.persistence.TemplateDAO;
 
 @Entity
-@Indexed(index = "kitodo-template")
 @Table(name = "template")
 public class Template extends BaseTemplateBean {
 
-    @GenericField
     @Column(name = "active")
     private Boolean active = true;
 
     @ManyToOne
-    @IndexedEmbedded(includePaths = {"id", "name"})
-    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
     @JoinColumn(name = "client_id", foreignKey = @ForeignKey(name = "FK_template_client_id"))
     private Client client;
 
     @ManyToOne
-    @IndexedEmbedded(includePaths = {"id", "title"})
-    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
     @JoinColumn(name = "docket_id", foreignKey = @ForeignKey(name = "FK_template_docket_id"))
     private Docket docket;
 
     @ManyToOne
-    @IndexedEmbedded(includePaths = {"id", "title"})
-    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
     @JoinColumn(name = "ruleset_id", foreignKey = @ForeignKey(name = "FK_template_ruleset_id"))
     private Ruleset ruleset;
 
     @ManyToOne
-    @IndexedEmbedded(includePaths = {"id", "title"})
-    @IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
     @JoinColumn(name = "workflow_id", foreignKey = @ForeignKey(name = "FK_template_workflow_id"))
     private Workflow workflow;
 
@@ -75,12 +60,9 @@ public class Template extends BaseTemplateBean {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
-    @IndexedEmbedded(includePaths = {"id", "title"})
     private List<Task> tasks;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
     @ManyToMany(cascade = CascadeType.PERSIST)
-    @IndexedEmbedded(includePaths = {"id", "active", "title"})
     @JoinTable(name = "project_x_template", joinColumns = {
         @JoinColumn(name = "template_id", foreignKey = @ForeignKey(name = "FK_project_x_template_template_id")) },
             inverseJoinColumns = {
@@ -320,7 +302,7 @@ public class Template extends BaseTemplateBean {
 
     @Override
     public int hashCode() {
-        return Objects.hash(client, docket, ruleset, workflow);
+        return Objects.nonNull(id) ? id : super.hashCode();
     }
 
     /**

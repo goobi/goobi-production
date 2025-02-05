@@ -19,6 +19,7 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kitodo.MockDatabase;
 import org.kitodo.SecurityTestUtils;
@@ -173,6 +174,7 @@ public class MigrationServiceIT {
     }
 
     @Test
+    @Ignore("functionality nowhere used, no longer implemented")
     public void getMatchingTemplatesTest() throws DAOException {
         Template template = new Template();
         template.setDocket(ServiceManager.getDocketService().getById(2));
@@ -188,11 +190,6 @@ public class MigrationServiceIT {
 
         Assert.assertNotNull(matchingTemplates.get(template));
         Assert.assertEquals(existingTemplates.get(0), matchingTemplates.get(template));
-
-        template.setDocket(null);
-
-        Assert.assertNull(matchingTemplates.get(template));
-        Assert.assertNotEquals(existingTemplates.get(0), matchingTemplates.get(template));
     }
 
     @Test
