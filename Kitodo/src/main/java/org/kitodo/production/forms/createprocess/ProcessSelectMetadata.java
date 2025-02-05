@@ -87,7 +87,7 @@ public class ProcessSelectMetadata extends ProcessSimpleMetadata implements Seri
     }
 
     @Override
-    ProcessSelectMetadata getClone() {
+    public ProcessSelectMetadata getClone() {
         return new ProcessSelectMetadata(this);
     }
 

@@ -48,7 +48,7 @@ public class ProcessTextMetadata extends ProcessSimpleMetadata implements Serial
     }
 
     @Override
-    ProcessTextMetadata getClone() {
+    public ProcessTextMetadata getClone() {
         return new ProcessTextMetadata(this);
     }
 

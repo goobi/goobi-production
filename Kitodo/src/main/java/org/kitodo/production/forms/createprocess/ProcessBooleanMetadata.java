@@ -57,7 +57,7 @@ public class ProcessBooleanMetadata extends ProcessSimpleMetadata implements Ser
     }
 
     @Override
-    ProcessBooleanMetadata getClone() {
+    public ProcessBooleanMetadata getClone() {
         return new ProcessBooleanMetadata(this);
     }
 
